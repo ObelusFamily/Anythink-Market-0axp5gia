@@ -73,7 +73,7 @@ async def create_new_item(
             detail=strings.ITEM_ALREADY_EXISTS,
         )
 
-    if item_create.image is None:
+    if not item_create.image:
         # Load your API key from an environment variable or secret management service
         openai.api_key = os.getenv("OPENAI_API_KEY")
         response = openai.Image.create(
