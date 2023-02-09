@@ -3,6 +3,10 @@ from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from starlette import status
 
+import os
+import openai
+
+
 from app.api.dependencies.items import (
     check_item_modification_permissions,
     get_item_by_slug_from_path,
@@ -68,6 +72,16 @@ async def create_new_item(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=strings.ITEM_ALREADY_EXISTS,
         )
+
+    if not item_create.image :
+        # Load your API key from an environment variable or secret management service
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        response = openai.Image.create(
+            prompt=item_create.title,
+            n=1,
+            size="256x256"
+        )
+        item_create.image = response['data'][0]['url']
     item = await items_repo.create_item(
         slug=slug,
         title=item_create.title,
